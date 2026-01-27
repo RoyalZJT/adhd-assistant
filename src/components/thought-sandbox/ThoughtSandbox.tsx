@@ -10,6 +10,8 @@ interface ThoughtSandboxProps {
     onAddThought: (thought: Thought) => void;
     /** 删除灵感回调 */
     onDeleteThought?: (id: string) => void;
+    /** 标记灵感为已处理 */
+    onProcessThought?: (id: string) => void;
 }
 
 // 使用 any 类型简化 SpeechRecognition 的处理
@@ -41,12 +43,18 @@ function getSpeechRecognitionClass(): (new () => SpeechRecognitionType) | null {
 export function ThoughtSandbox({
     thoughts,
     onAddThought,
+    onDeleteThought,
+    onProcessThought,
 }: ThoughtSandboxProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [showList, setShowList] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [isRecording, setIsRecording] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const inputRef = useRef<HTMLTextAreaElement>(null);
+
+    // 计算暂存箱中的灵感数量
+    const inboxCount = thoughts.filter(t => t.status === 'inbox').length;
 
     // 使用 ref 保存 recognition 实例，避免重复创建
     const recognitionRef = useRef<SpeechRecognitionType | null>(null);
@@ -159,15 +167,23 @@ export function ThoughtSandbox({
         }
     }, [errorMessage]);
 
-    // 保存灵感
+    // 保存灵感 - 零摩擦
     const handleSave = useCallback(() => {
         if (!inputValue.trim()) return;
 
         const thought = createThought(inputValue.trim(), isRecording ? 'voice' : 'text');
         onAddThought(thought);
         setInputValue('');
-        setIsOpen(false);
+        // 保持开启状态，方便连续输入
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
     }, [inputValue, isRecording, onAddThought]);
+
+    // 标记灵感为已处理
+    const handleProcess = useCallback((id: string) => {
+        onProcessThought?.(id);
+    }, [onProcessThought]);
 
     // 键盘快捷键
     useEffect(() => {
@@ -238,13 +254,16 @@ export function ThoughtSandbox({
 
                         <div className="thought-input-area">
                             <textarea
+                                ref={inputRef}
                                 className="thought-textarea"
-                                placeholder="突然想到什么？快记下来！"
+                                placeholder="突然想到什么？按 Enter 快速保存！"
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
                                 autoFocus
                                 onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                                    // 零摩擦保存：Enter 直接保存，Shift+Enter 换行
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
                                         handleSave();
                                     }
                                 }}
@@ -273,27 +292,55 @@ export function ThoughtSandbox({
                             onClick={handleSave}
                             disabled={!inputValue.trim()}
                         >
-                            保存灵感 (Ctrl + Enter)
+                            保存 (Enter)
                         </button>
+                        <div className="thought-hint">
+                            💡 Shift+Enter 换行，Esc 关闭
+                        </div>
                     </div>
                 </div>
             )}
 
-            {/* 灵感列表 */}
+            {/* 灵感列表 - 暂存箱 */}
             {showList && thoughts.length > 0 && (
                 <div className="thoughts-list">
                     <div className="thoughts-list-header">
-                        最近的灵感 ({thoughts.length})
+                        📥 暂存箱 ({inboxCount} 个未处理)
                     </div>
                     {thoughts.slice(0, 10).map((thought) => (
-                        <div key={thought.id} className="thought-item">
+                        <div
+                            key={thought.id}
+                            className={`thought-item ${thought.status === 'processed' ? 'processed' : ''}`}
+                        >
                             <div className="thought-content">{thought.content}</div>
                             <div className="thought-meta">
                                 <span className="thought-type-badge">
-                                    {thought.type === 'voice' ? '🎤' : '✏️'}
-                                    {thought.type === 'voice' ? '语音' : '文字'}
+                                    {thought.type === 'voice' ? '🎙️' : '✏️'}
+                                </span>
+                                <span className={`thought-status ${thought.status}`}>
+                                    {thought.status === 'inbox' ? '📥' : '✅'}
                                 </span>
                                 <span>{formatTime(thought.createdAt)}</span>
+                            </div>
+                            <div className="thought-actions">
+                                {thought.status === 'inbox' && onProcessThought && (
+                                    <button
+                                        className="thought-action-btn process"
+                                        onClick={() => handleProcess(thought.id)}
+                                        title="标记为已处理"
+                                    >
+                                        ✅
+                                    </button>
+                                )}
+                                {onDeleteThought && (
+                                    <button
+                                        className="thought-action-btn delete"
+                                        onClick={() => onDeleteThought(thought.id)}
+                                        title="删除"
+                                    >
+                                        🗑️
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}

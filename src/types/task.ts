@@ -28,6 +28,10 @@ export interface Task {
     status: TaskStatus;
     createdAt: number;
     completedAt?: number;
+    /** 截止日期时间戳 */
+    dueDate?: number;
+    /** 归档时间戳 - 放入"冰柜"的时间 */
+    archivedAt?: number;
 }
 
 /**

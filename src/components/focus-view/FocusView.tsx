@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { MicroTask } from '../../types';
 import { VisualTimer } from '../visual-timer';
-import { VibrationPatterns, focusShield } from '../../services';
+import { CelebrationOverlay } from '../celebration';
+import { VibrationPatterns, focusShield, rewardSystem, Reward } from '../../services';
 import './FocusView.css';
 
 interface FocusViewProps {
@@ -22,6 +23,7 @@ interface FocusViewProps {
 /**
  * 单一焦点模式组件
  * 全屏显示当前任务，屏蔽所有干扰信息
+ * 集成多巴胺反馈系统
  */
 export function FocusView({
     taskTitle: _taskTitle,
@@ -34,6 +36,12 @@ export function FocusView({
     // 注意：taskTitle 在 props 中保留用于未来功能
     void _taskTitle;
     const [isRunning, setIsRunning] = useState(true);
+
+    // 庆祝动画状态
+    const [showCelebration, setShowCelebration] = useState(false);
+    const [celebrationReward, setCelebrationReward] = useState<Reward | null>(null);
+    const [comboCount, setComboCount] = useState(0);
+    const [isAllComplete, setIsAllComplete] = useState(false);
 
     // 计算剩余时间（分钟转秒）
     const duration = microTask.estimatedMinutes * 60;
@@ -59,9 +67,32 @@ export function FocusView({
         setIsRunning(false);
     }, []);
 
-    // 完成任务
+    // 完成任务 - 触发多巴胺反馈
     const handleComplete = useCallback(() => {
+        // 检查是否是最后一个任务
+        const pendingTasks = allMicroTasks.filter(t => t.status !== 'completed');
+        const willBeAllComplete = pendingTasks.length <= 1; // 当前这个完成后就全部完成
+
+        // 触发奖励系统
+        const { reward, comboCount: combo } = rewardSystem.triggerCompletion(willBeAllComplete);
+
+        // 震动反馈
         VibrationPatterns.success();
+        if (willBeAllComplete) {
+            rewardSystem.vibrate([100, 50, 100, 50, 200]); // 强力震动
+        }
+
+        // 设置庆祝状态
+        setCelebrationReward(reward);
+        setComboCount(combo);
+        setIsAllComplete(willBeAllComplete);
+        setShowCelebration(true);
+    }, [allMicroTasks]);
+
+    // 庆祝动画结束后执行实际的完成逻辑
+    const handleCelebrationClose = useCallback(() => {
+        setShowCelebration(false);
+        setCelebrationReward(null);
         onComplete();
     }, [onComplete]);
 
@@ -108,6 +139,15 @@ export function FocusView({
                     <span>完成任务</span>
                 </button>
             </div>
+
+            {/* 庆祝动画覆盖层 */}
+            <CelebrationOverlay
+                isVisible={showCelebration}
+                reward={celebrationReward}
+                comboCount={comboCount}
+                isAllComplete={isAllComplete}
+                onClose={handleCelebrationClose}
+            />
         </div>
     );
 }

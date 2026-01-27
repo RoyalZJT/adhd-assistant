@@ -1,0 +1,236 @@
+/**
+ * 宽恕按钮样式
+ * 温暖、治愈、无压力的视觉设计
+ */
+
+/* 覆盖层 */
+.fresh-start-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--space-lg);
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* 弹窗主体 */
+.fresh-start-modal {
+    background: linear-gradient(135deg,
+            hsla(150, 40%, 15%, 0.95) 0%,
+            hsla(180, 30%, 12%, 0.95) 100%);
+    border-radius: 24px;
+    padding: var(--space-2xl);
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    border: 1px solid hsla(150, 50%, 40%, 0.3);
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 40px hsla(150, 50%, 50%, 0.1);
+    animation: modalSlideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 图标区域 */
+.fresh-start-icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    margin-bottom: var(--space-lg);
+}
+
+.icon-emoji {
+    font-size: 3.5rem;
+    z-index: 1;
+    animation: iconBreathe 2s ease-in-out infinite;
+}
+
+@keyframes iconBreathe {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.icon-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle,
+            hsla(150, 60%, 50%, 0.4) 0%,
+            transparent 70%);
+    border-radius: 50%;
+    filter: blur(15px);
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+}
+
+/* 标题 */
+.fresh-start-title {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-lg);
+    line-height: 1.4;
+}
+
+/* 消息区域 */
+.fresh-start-message {
+    margin-bottom: var(--space-xl);
+}
+
+.message-main {
+    font-size: var(--text-base);
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.message-main strong {
+    color: hsl(150, 60%, 60%);
+}
+
+.message-sub {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-md);
+}
+
+.message-quote {
+    font-size: var(--text-sm);
+    color: hsla(150, 60%, 70%, 0.9);
+    font-style: italic;
+    padding: var(--space-sm) var(--space-md);
+    background: hsla(150, 40%, 30%, 0.2);
+    border-radius: 8px;
+    border-left: 3px solid hsl(150, 50%, 50%);
+}
+
+/* 操作按钮 */
+.fresh-start-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.fresh-start-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: 12px;
+    font-size: var(--text-base);
+    font-weight: 600;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.fresh-start-btn-primary {
+    background: linear-gradient(135deg,
+            hsl(150, 60%, 45%) 0%,
+            hsl(170, 50%, 40%) 100%);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 15px hsla(150, 60%, 40%, 0.3);
+}
+
+.fresh-start-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px hsla(150, 60%, 40%, 0.4);
+}
+
+.fresh-start-btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-icon {
+    font-size: 1.2rem;
+}
+
+.fresh-start-btn-secondary {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+}
+
+.fresh-start-btn-secondary:hover {
+    border-color: var(--text-secondary);
+    color: var(--text-primary);
+}
+
+/* 说明文字 */
+.fresh-start-note {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    margin: 0;
+}
+
+/* 响应式 */
+@media (max-width: 480px) {
+    .fresh-start-modal {
+        padding: var(--space-xl);
+        border-radius: 20px;
+    }
+
+    .fresh-start-title {
+        font-size: var(--text-lg);
+    }
+
+    .icon-emoji {
+        font-size: 3rem;
+    }
+}

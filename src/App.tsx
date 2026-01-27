@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useApp } from './store/AppContext';
 import { useAuth } from './contexts/AuthContext';
 import { Task, createThought } from './types';
-import { TaskDecomposer, FocusView, ThoughtSandbox, DownloadModal } from './components';
+import { TaskDecomposer, FocusView, ThoughtSandbox, DownloadModal, FreshStartModal } from './components';
 import { AuthGate } from './components/AuthGate';
 import './App.css';
 
@@ -17,6 +17,32 @@ function App() {
     const [focusTask, setFocusTask] = useState<Task | null>(null);
     const [focusMicroTaskIndex, setFocusMicroTaskIndex] = useState(0);
     const [showDownload, setShowDownload] = useState(false);
+    const [showFreshStart, setShowFreshStart] = useState(false);
+
+    // 计算未完成且未归档的任务数量（逾期任务）
+    const overdueTaskCount = useMemo(() => {
+        return state.tasks.filter(t =>
+            t.status !== 'completed' && !t.archivedAt
+        ).length;
+    }, [state.tasks]);
+
+    // 当逾期任务超过 3 个时，自动弹出宽恕模式
+    useEffect(() => {
+        if (overdueTaskCount >= 3 && isAuthenticated) {
+            // 检查是否已经弹出过（今天）
+            const lastShown = localStorage.getItem('adhd_fresh_start_shown');
+            const today = new Date().toDateString();
+            if (lastShown !== today) {
+                setShowFreshStart(true);
+                localStorage.setItem('adhd_fresh_start_shown', today);
+            }
+        }
+    }, [overdueTaskCount, isAuthenticated]);
+
+    // 宽恕按钮 - 归档所有逾期任务
+    const handleFreshStart = useCallback(() => {
+        dispatch({ type: 'ARCHIVE_OVERDUE_TASKS' });
+    }, [dispatch]);
 
     // NOTE: 所有 Hooks 必须在条件渲染之前调用，符合 React Hooks 规则
 
@@ -88,6 +114,11 @@ function App() {
     // 删除灵感
     const handleDeleteThought = useCallback((id: string) => {
         dispatch({ type: 'DELETE_THOUGHT', payload: id });
+    }, [dispatch]);
+
+    // 标记灵感为已处理
+    const handleProcessThought = useCallback((id: string) => {
+        dispatch({ type: 'PROCESS_THOUGHT', payload: id });
     }, [dispatch]);
 
     // 认证加载中
@@ -286,17 +317,26 @@ function App() {
                 />
             )}
 
-            {/* 思维中转站 */}
+            {/* 思维中转站 - 闪念胶囊 */}
             <ThoughtSandbox
                 thoughts={state.thoughts}
                 onAddThought={handleAddThought}
                 onDeleteThought={handleDeleteThought}
+                onProcessThought={handleProcessThought}
             />
 
             {/* 下载安装指南 */}
             <DownloadModal
                 isOpen={showDownload}
                 onClose={() => setShowDownload(false)}
+            />
+
+            {/* 宽恕按钮 - Fresh Start */}
+            <FreshStartModal
+                isOpen={showFreshStart}
+                overdueCount={overdueTaskCount}
+                onConfirm={handleFreshStart}
+                onClose={() => setShowFreshStart(false)}
             />
         </div>
     );

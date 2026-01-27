@@ -25,6 +25,7 @@ type AppAction =
     | { type: 'ADD_MICRO_TASK'; payload: { taskId: string; microTask: MicroTask } }
     | { type: 'UPDATE_MICRO_TASK'; payload: { taskId: string; microTask: MicroTask } }
     | { type: 'COMPLETE_MICRO_TASK'; payload: { taskId: string; microTaskId: string } }
+    | { type: 'ARCHIVE_OVERDUE_TASKS' } // 宽恕按钮 - 归档逾期任务
     // 专注模式相关
     | { type: 'START_FOCUS'; payload: { taskId: string; microTaskId: string; duration: number } }
     | { type: 'PAUSE_FOCUS' }
@@ -33,6 +34,7 @@ type AppAction =
     // 灵感记录相关
     | { type: 'ADD_THOUGHT'; payload: Thought }
     | { type: 'DELETE_THOUGHT'; payload: string }
+    | { type: 'PROCESS_THOUGHT'; payload: string } // 闪念胶囊 - 标记为已处理
     // 数据恢复
     | { type: 'LOAD_STATE'; payload: AppState };
 
@@ -98,6 +100,17 @@ function appReducer(state: AppState, action: AppAction): AppState {
                 )
             };
 
+        // 宽恕按钮 - 将所有未完成的任务归档到“冰柜”
+        case 'ARCHIVE_OVERDUE_TASKS':
+            return {
+                ...state,
+                tasks: state.tasks.map(t =>
+                    t.status !== 'completed' && !t.archivedAt
+                        ? { ...t, archivedAt: Date.now() }
+                        : t
+                )
+            };
+
         // 专注模式操作
         case 'START_FOCUS':
             return {
@@ -138,6 +151,17 @@ function appReducer(state: AppState, action: AppAction): AppState {
             return {
                 ...state,
                 thoughts: state.thoughts.filter(t => t.id !== action.payload)
+            };
+
+        // 闪念胶囊 - 标记为已处理
+        case 'PROCESS_THOUGHT':
+            return {
+                ...state,
+                thoughts: state.thoughts.map(t =>
+                    t.id === action.payload
+                        ? { ...t, status: 'processed' as const, processedAt: Date.now() }
+                        : t
+                )
             };
 
         // 数据恢复
