@@ -192,10 +192,10 @@ export function CelebrationOverlay({
                 {reward && showReward && (
                     <div className={`reward-popup ${getRewardClass(reward.type)}`}>
                         <div className="reward-glow" />
-                        <span className="reward-emoji">{reward.emoji}</span>
+                        <span className="reward-emoji">{String(reward.emoji)}</span>
                         <div className="reward-info">
-                            <span className="reward-title">{reward.title}</span>
-                            <span className="reward-desc">{reward.description}</span>
+                            <span className="reward-title">{String(reward.title)}</span>
+                            <span className="reward-desc">{String(reward.description)}</span>
                         </div>
                     </div>
                 )}

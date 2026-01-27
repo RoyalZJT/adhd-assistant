@@ -26,8 +26,31 @@ export class ErrorBoundary extends Component<Props, State> {
         return { hasError: true, error, errorInfo: null };
     }
 
+    public componentDidMount() {
+        // 如果应用在加载后 10 秒内没有崩溃，则认为状态已稳定，清除自动修复标记
+        // 这样下次如果发生崩溃，仍然可以尝试自动修复
+        setTimeout(() => {
+            sessionStorage.removeItem('adhd_auto_fix_attempted');
+        }, 10000);
+    }
+
     public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
         console.error('Uncaught error:', error, errorInfo);
+
+        // 自动修复机制：检测到致命错误时，尝试一次自动清理数据
+        // 使用 sessionStorage 防止无限循环刷新
+        const hasAutoFixed = sessionStorage.getItem('adhd_auto_fix_attempted');
+
+        if (!hasAutoFixed) {
+            // 标记已尝试自动修复
+            sessionStorage.setItem('adhd_auto_fix_attempted', 'true');
+            console.log('Attempting auto-fix: Clearing data and reloading...');
+
+            // 执行清理
+            this.handleReset();
+            return;
+        }
+
         this.setState({
             error,
             errorInfo,
@@ -35,10 +58,21 @@ export class ErrorBoundary extends Component<Props, State> {
     }
 
     private handleReset = () => {
-        // 清除可能损坏的本地存储
-        localStorage.removeItem('adhd-assistant-state');
-        localStorage.removeItem('adhd_user');
-        localStorage.removeItem('adhd_token');
+        // 清除所有相关的本地存储
+        try {
+            console.log('Clearing all app data...');
+            localStorage.removeItem('adhd-assistant-state');
+            localStorage.removeItem('adhd_user');
+            localStorage.removeItem('adhd_token');
+            // 清除其他可能残留的 key
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('adhd')) {
+                    localStorage.removeItem(key);
+                }
+            });
+        } catch (e) {
+            console.error('Failed to clear localStorage', e);
+        }
 
         // 重置错误状态
         this.setState({
