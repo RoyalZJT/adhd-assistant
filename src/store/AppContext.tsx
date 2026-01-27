@@ -193,24 +193,66 @@ interface AppProviderProps {
 export function AppProvider({ children }: AppProviderProps) {
     const [state, dispatch] = useReducer(appReducer, initialState);
 
+    // 深度清洗函数：确保对象中没有嵌套的对象（除了数组），防止 React 渲染崩溃
+    const deepSanitize = (obj: any): any => {
+        if (obj === null || obj === undefined) return obj;
+        if (typeof obj !== 'object') return obj;
+
+        if (Array.isArray(obj)) {
+            return obj.map(deepSanitize);
+        }
+
+        const newObj: any = {};
+        for (const key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                const value = obj[key];
+                // 如果值是对象且不是数组（和 null），这对于 Task 数据模型来说是非法的（除非是特定的已知结构）
+                // 我们的数据模型中，Task 和 Though 只有非对象属性（除了 microTasks 数组）
+                if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                    // 强制转为字符串，避免 React Error #31
+                    console.warn(`Sanitizing illegal object in key "${key}":`, value);
+                    newObj[key] = String(value);
+                } else {
+                    newObj[key] = deepSanitize(value);
+                }
+            }
+        }
+        return newObj;
+    };
+
     // 数据迁移：为旧数据添加新字段的默认值
     const migrateState = (savedState: AppState): AppState => {
+        let stateToMigrate: AppState = { ...savedState };
+
+        try {
+            // 针对 Task 和 Thoughts 列表进行单独清洗
+            if (Array.isArray(savedState.tasks)) {
+                stateToMigrate.tasks = savedState.tasks.map(deepSanitize);
+            }
+            if (Array.isArray(savedState.thoughts)) {
+                stateToMigrate.thoughts = savedState.thoughts.map(deepSanitize);
+            }
+        } catch (e) {
+            console.error('Sanitization failed', e);
+            // 如果清洗失败，stateToMigrate 仍然包含所有数据，虽然可能包含坏数据
+            // 但后续的 map 会提供基本保护
+        }
+
         return {
-            ...savedState,
-            // 迁移 Thought 数据：添加 status 字段
+            ...stateToMigrate,
             // 迁移 Thought 数据：确保 status 是字符串且有效
-            thoughts: Array.isArray(savedState.thoughts) ? savedState.thoughts.map(t => ({
+            thoughts: Array.isArray(stateToMigrate.thoughts) ? stateToMigrate.thoughts.map(t => ({
                 ...t,
                 status: (typeof t.status === 'string' && (t.status === 'inbox' || t.status === 'processed'))
                     ? t.status
-                    : 'inbox', // 如果 status 缺失或类型错误（如为对象），重置为 inbox
+                    : 'inbox',
             })) : [],
             // 迁移 Task 数据：确保有 archivedAt 字段
-            tasks: savedState.tasks.map(task => ({
+            tasks: Array.isArray(stateToMigrate.tasks) ? stateToMigrate.tasks.map(task => ({
                 ...task,
                 archivedAt: task.archivedAt ?? undefined,
                 dueDate: task.dueDate ?? undefined,
-            })),
+            })) : [],
         };
     };
 
