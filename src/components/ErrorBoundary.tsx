@@ -28,7 +28,6 @@ export class ErrorBoundary extends Component<Props, State> {
 
     public componentDidMount() {
         // 如果应用在加载后 10 秒内没有崩溃，则认为状态已稳定，清除自动修复标记
-        // 这样下次如果发生崩溃，仍然可以尝试自动修复
         setTimeout(() => {
             sessionStorage.removeItem('adhd_auto_fix_attempted');
         }, 10000);
@@ -48,6 +47,8 @@ export class ErrorBoundary extends Component<Props, State> {
 
             // 执行清理
             this.handleReset();
+            // 暂时禁用自动刷新，以便用户能看清错误信息
+            // window.location.reload(); 
             return;
         }
 
@@ -81,8 +82,8 @@ export class ErrorBoundary extends Component<Props, State> {
             errorInfo: null
         });
 
-        // 强制刷新
-        window.location.reload();
+        // 暂时禁用自动刷新
+        // window.location.reload();
     };
 
     public render() {
@@ -105,7 +106,10 @@ export class ErrorBoundary extends Component<Props, State> {
                         <div className="error-actions">
                             <button
                                 className="reset-button"
-                                onClick={this.handleReset}
+                                onClick={() => {
+                                    this.handleReset();
+                                    window.location.reload(); // 手动点击时才刷新
+                                }}
                             >
                                 🗑️ 清除所有数据并重试
                             </button>

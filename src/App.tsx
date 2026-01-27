@@ -138,13 +138,15 @@ function App() {
 
     // 计算任务进度
     const getTaskProgress = (task: Task) => {
-        const completed = task.microTasks.filter(mt => mt.status === 'completed').length;
-        return { completed, total: task.microTasks.length };
+        const microTasks = Array.isArray(task.microTasks) ? task.microTasks : [];
+        const completed = microTasks.filter(mt => mt.status === 'completed').length;
+        return { completed, total: microTasks.length };
     };
 
     // 计算总时长
     const getTaskDuration = (task: Task) => {
-        return task.microTasks.reduce((sum, mt) => sum + mt.estimatedMinutes, 0);
+        const microTasks = Array.isArray(task.microTasks) ? task.microTasks : [];
+        return microTasks.reduce((sum, mt) => sum + mt.estimatedMinutes, 0);
     };
 
     return (
@@ -251,7 +253,7 @@ function App() {
 
                                     {/* 微任务芯片 */}
                                     <div className="micro-tasks-progress">
-                                        {task.microTasks.map((mt) => (
+                                        {(Array.isArray(task.microTasks) ? task.microTasks : []).map((mt) => (
                                             <span
                                                 key={mt.id}
                                                 className={`micro-task-chip ${String(mt.status)}`}

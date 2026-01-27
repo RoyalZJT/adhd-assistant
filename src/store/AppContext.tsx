@@ -252,6 +252,7 @@ export function AppProvider({ children }: AppProviderProps) {
                 ...task,
                 archivedAt: task.archivedAt ?? undefined,
                 dueDate: task.dueDate ?? undefined,
+                microTasks: Array.isArray(task.microTasks) ? task.microTasks : [],
             })) : [],
         };
     };
