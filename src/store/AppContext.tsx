@@ -193,61 +193,71 @@ interface AppProviderProps {
 export function AppProvider({ children }: AppProviderProps) {
     const [state, dispatch] = useReducer(appReducer, initialState);
 
-    // 深度清洗函数：确保对象中没有嵌套的对象（除了数组），防止 React 渲染崩溃
-    const deepSanitize = (obj: any): any => {
+    // 严格清洗函数：递归清洗，但如果发现非法结构，返回 null 标记为丢弃
+    const strictSanitize = (obj: any): any => {
         if (obj === null || obj === undefined) return obj;
+
+        // 如果是基本类型，直接返回
         if (typeof obj !== 'object') return obj;
 
+        // 如果是数组，递归处理
         if (Array.isArray(obj)) {
-            return obj.map(deepSanitize);
+            return obj.map(strictSanitize).filter((item: any) => item !== null);
         }
 
         const newObj: any = {};
         for (const key in obj) {
             if (Object.prototype.hasOwnProperty.call(obj, key)) {
                 const value = obj[key];
-                // 如果值是对象且不是数组（和 null），这对于 Task 数据模型来说是非法的（除非是特定的已知结构）
-                // 我们的数据模型中，Task 和 Though 只有非对象属性（除了 microTasks 数组）
+
+                // 核心防御：如果值是对象且不是数组（和 null），这对于我们的数据模型（Task/Thought）来说是非法的
+                // 只有 microTasks 数组里的元素是对象。
+                // 如果我们正在处理 Task 对象，它的属性应该是基本类型（除了 microTasks）
+                // 这种判断比较粗糙，但很安全。
                 if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-                    // 强制转为字符串，避免 React Error #31
-                    console.warn(`Sanitizing illegal object in key "${key}":`, value);
+                    // 遇到非法嵌套对象，直接丢弃该属性，或者转换为字符串
+                    // 为了绝对安全，我们将其转为字符串，但加上标记
                     newObj[key] = String(value);
                 } else {
-                    newObj[key] = deepSanitize(value);
+                    newObj[key] = strictSanitize(value);
                 }
             }
         }
         return newObj;
     };
 
-    // 数据迁移：为旧数据添加新字段的默认值
+    // 数据迁移与清洗
     const migrateState = (savedState: AppState): AppState => {
         let stateToMigrate: AppState = { ...savedState };
 
         try {
-            // 针对 Task 和 Thoughts 列表进行单独清洗
+            // 针对 Task 和 Thoughts 列表进行严格清洗
             if (Array.isArray(savedState.tasks)) {
-                stateToMigrate.tasks = savedState.tasks.map(deepSanitize);
+                // 过滤掉任何清洗后变为 null 的项，或者结构严重错误的项
+                stateToMigrate.tasks = savedState.tasks.map(strictSanitize).filter(t => t && t.id && t.title);
+            } else {
+                stateToMigrate.tasks = [];
             }
+
             if (Array.isArray(savedState.thoughts)) {
-                stateToMigrate.thoughts = savedState.thoughts.map(deepSanitize);
+                stateToMigrate.thoughts = savedState.thoughts.map(strictSanitize).filter(t => t && t.id && t.content);
+            } else {
+                stateToMigrate.thoughts = [];
             }
         } catch (e) {
-            console.error('Sanitization failed', e);
-            // 如果清洗失败，stateToMigrate 仍然包含所有数据，虽然可能包含坏数据
-            // 但后续的 map 会提供基本保护
+            console.error('Strict sanitization failed', e);
+            // 如果清洗过程本身崩溃，直接重置为初始状态
+            return initialState;
         }
 
         return {
             ...stateToMigrate,
-            // 迁移 Thought 数据：确保 status 是字符串且有效
             thoughts: Array.isArray(stateToMigrate.thoughts) ? stateToMigrate.thoughts.map(t => ({
                 ...t,
                 status: (typeof t.status === 'string' && (t.status === 'inbox' || t.status === 'processed'))
                     ? t.status
                     : 'inbox',
             })) : [],
-            // 迁移 Task 数据：确保有 archivedAt 字段
             tasks: Array.isArray(stateToMigrate.tasks) ? stateToMigrate.tasks.map(task => ({
                 ...task,
                 archivedAt: task.archivedAt ?? undefined,
