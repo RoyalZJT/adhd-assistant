@@ -53,8 +53,8 @@ export function ThoughtSandbox({
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
 
-    // 计算暂存箱中的灵感数量
-    const inboxCount = thoughts.filter(t => t.status === 'inbox').length;
+    // 计算暂存箱中的灵感数量（安全检查）
+    const inboxCount = (thoughts || []).filter(t => t?.status === 'inbox').length;
 
     // 使用 ref 保存 recognition 实例，避免重复创建
     const recognitionRef = useRef<SpeechRecognitionType | null>(null);
@@ -302,12 +302,12 @@ export function ThoughtSandbox({
             )}
 
             {/* 灵感列表 - 暂存箱 */}
-            {showList && thoughts.length > 0 && (
+            {showList && thoughts && thoughts.length > 0 && (
                 <div className="thoughts-list">
                     <div className="thoughts-list-header">
                         📥 暂存箱 ({inboxCount} 个未处理)
                     </div>
-                    {thoughts.slice(0, 10).map((thought) => (
+                    {(thoughts || []).slice(0, 10).map((thought) => (
                         <div
                             key={thought.id}
                             className={`thought-item ${thought.status === 'processed' ? 'processed' : ''}`}

@@ -198,10 +198,13 @@ export function AppProvider({ children }: AppProviderProps) {
         return {
             ...savedState,
             // 迁移 Thought 数据：添加 status 字段
-            thoughts: savedState.thoughts.map(t => ({
+            // 迁移 Thought 数据：确保 status 是字符串且有效
+            thoughts: Array.isArray(savedState.thoughts) ? savedState.thoughts.map(t => ({
                 ...t,
-                status: t.status || 'inbox', // 旧数据默认为 inbox
-            })),
+                status: (typeof t.status === 'string' && (t.status === 'inbox' || t.status === 'processed'))
+                    ? t.status
+                    : 'inbox', // 如果 status 缺失或类型错误（如为对象），重置为 inbox
+            })) : [],
             // 迁移 Task 数据：确保有 archivedAt 字段
             tasks: savedState.tasks.map(task => ({
                 ...task,

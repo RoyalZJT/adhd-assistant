@@ -19,10 +19,10 @@ function App() {
     const [showDownload, setShowDownload] = useState(false);
     const [showFreshStart, setShowFreshStart] = useState(false);
 
-    // 计算未完成且未归档的任务数量（逾期任务）
+    // 计算未完成且未归档的任务数量（逾期任务）- 添加空值检查
     const overdueTaskCount = useMemo(() => {
-        return state.tasks.filter(t =>
-            t.status !== 'completed' && !t.archivedAt
+        return (state.tasks || []).filter(t =>
+            t?.status !== 'completed' && !t?.archivedAt
         ).length;
     }, [state.tasks]);
 
