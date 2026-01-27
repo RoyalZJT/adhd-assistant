@@ -172,7 +172,7 @@ function App() {
                     </button>
                     <div className="user-menu">
                         <span className="user-avatar">👤</span>
-                        <span className="user-name">{user?.username || user?.email?.split('@')[0] || '用户'}</span>
+                        <span className="user-name">{String(user?.username || user?.email?.split('@')[0] || '用户')}</span>
                         <button
                             className="logout-btn"
                             onClick={logout}
@@ -226,7 +226,7 @@ function App() {
                                     <div className="task-card-header">
                                         <h3 className="task-card-title">
                                             {isCompleted && '✅ '}
-                                            {task.title}
+                                            {String(task.title)}
                                         </h3>
                                         <div className="task-card-actions">
                                             <button
@@ -254,9 +254,9 @@ function App() {
                                         {task.microTasks.map((mt) => (
                                             <span
                                                 key={mt.id}
-                                                className={`micro-task-chip ${mt.status}`}
+                                                className={`micro-task-chip ${String(mt.status)}`}
                                             >
-                                                {mt.status === 'completed' ? '✓' : '○'} {mt.title}
+                                                {mt.status === 'completed' ? '✓' : '○'} {String(mt.title)}
                                             </span>
                                         ))}
                                     </div>

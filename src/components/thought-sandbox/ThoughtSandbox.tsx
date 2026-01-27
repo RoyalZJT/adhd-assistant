@@ -312,12 +312,12 @@ export function ThoughtSandbox({
                             key={thought.id}
                             className={`thought-item ${thought.status === 'processed' ? 'processed' : ''}`}
                         >
-                            <div className="thought-content">{thought.content}</div>
+                            <div className="thought-content">{String(thought.content)}</div>
                             <div className="thought-meta">
                                 <span className="thought-type-badge">
                                     {thought.type === 'voice' ? '🎙️' : '✏️'}
                                 </span>
-                                <span className={`thought-status ${thought.status}`}>
+                                <span className={`thought-status ${String(thought.status)}`}>
                                     {thought.status === 'inbox' ? '📥' : '✅'}
                                 </span>
                                 <span>{formatTime(thought.createdAt)}</span>
