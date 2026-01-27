@@ -78,12 +78,33 @@ export const authService = {
 
     /**
      * 用户登录
+     * NOTE: 后端使用 OAuth2 标准，需要 form-urlencoded 格式
      */
     login: async (params: LoginParams): Promise<User> => {
-        const response = await apiClient.post<LoginResponse>('/api/auth/login', params);
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        
+        // 使用 URLSearchParams 构建 form-data
+        const formData = new URLSearchParams();
+        formData.append('username', params.email);
+        formData.append('password', params.password);
+
+        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData.toString(),
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new ApiError(response.status, error.detail || '登录失败');
+        }
+
+        const data: LoginResponse = await response.json();
 
         // 保存 Token
-        tokenManager.setTokens(response.access_token, response.refresh_token);
+        tokenManager.setTokens(data.access_token, data.refresh_token);
 
         // 获取用户信息
         const userResponse = await apiClient.get<UserResponse>('/api/auth/me');
