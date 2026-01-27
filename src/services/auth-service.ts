@@ -2,7 +2,7 @@
  * 认证服务
  * 处理用户登录、注册、登出等操作
  */
-import { apiClient, tokenManager, ApiError } from './api-client';
+import { apiClient, tokenManager, ApiError, formatApiError } from './api-client';
 
 /**
  * 用户信息类型
@@ -82,7 +82,7 @@ export const authService = {
      */
     login: async (params: LoginParams): Promise<User> => {
         const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-        
+
         // 使用 URLSearchParams 构建 form-data
         const formData = new URLSearchParams();
         formData.append('username', params.email);
@@ -98,7 +98,8 @@ export const authService = {
 
         if (!response.ok) {
             const error = await response.json().catch(() => ({}));
-            throw new ApiError(response.status, error.detail || '登录失败');
+            const errorMessage = error.detail ? formatApiError(error.detail) : '登录失败';
+            throw new ApiError(response.status, errorMessage);
         }
 
         const data: LoginResponse = await response.json();

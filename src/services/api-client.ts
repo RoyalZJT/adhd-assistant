@@ -55,6 +55,37 @@ export class ApiError extends Error {
  * 发起 API 请求
  * 自动处理 Token 和错误
  */
+
+/**
+ * 格式化 API 错误信息
+ * 专门处理 Pydantic/FastAPI 返回的复杂错误结构
+ */
+export function formatApiError(detail: any): string {
+    if (typeof detail === 'string') return detail;
+
+    // 处理 Pydantic 错误数组 (例如 422 错误)
+    if (Array.isArray(detail)) {
+        // 取第一条错误信息，通常够用了
+        const firstError = detail[0];
+        if (firstError && typeof firstError === 'object' && firstError.msg) {
+            // 尝试更友好的格式：[字段名] 错误信息
+            const field = firstError.loc ? firstError.loc[firstError.loc.length - 1] : 'Field';
+            return `${field}: ${firstError.msg}`;
+        }
+        return JSON.stringify(detail);
+    }
+
+    if (typeof detail === 'object' && detail !== null) {
+        return JSON.stringify(detail);
+    }
+
+    return String(detail);
+}
+
+/**
+ * 发起 API 请求
+ * 自动处理 Token 和错误
+ */
 async function request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -88,7 +119,8 @@ async function request<T>(
 
             if (!retryResponse.ok) {
                 const error = await retryResponse.json().catch(() => ({}));
-                throw new ApiError(retryResponse.status, '请求失败', error.detail);
+                const errorMessage = error.detail ? formatApiError(error.detail) : '请求失败';
+                throw new ApiError(retryResponse.status, errorMessage, error.detail);
             }
 
             return retryResponse.json();
@@ -101,7 +133,9 @@ async function request<T>(
 
     if (!response.ok) {
         const error = await response.json().catch(() => ({}));
-        throw new ApiError(response.status, error.detail || '请求失败', error.detail);
+        const errorMessage = error.detail ? formatApiError(error.detail) : '请求失败';
+        // 传递格式化后的 message
+        throw new ApiError(response.status, errorMessage, error.detail);
     }
 
     return response.json();
