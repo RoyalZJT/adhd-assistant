@@ -193,16 +193,38 @@ interface AppProviderProps {
 export function AppProvider({ children }: AppProviderProps) {
     const [state, dispatch] = useReducer(appReducer, initialState);
 
+    // 数据迁移：为旧数据添加新字段的默认值
+    const migrateState = (savedState: AppState): AppState => {
+        return {
+            ...savedState,
+            // 迁移 Thought 数据：添加 status 字段
+            thoughts: savedState.thoughts.map(t => ({
+                ...t,
+                status: t.status || 'inbox', // 旧数据默认为 inbox
+            })),
+            // 迁移 Task 数据：确保有 archivedAt 字段
+            tasks: savedState.tasks.map(task => ({
+                ...task,
+                archivedAt: task.archivedAt ?? undefined,
+                dueDate: task.dueDate ?? undefined,
+            })),
+        };
+    };
+
     // 从 LocalStorage 恢复数据
     useEffect(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 const parsed = JSON.parse(saved);
-                dispatch({ type: 'LOAD_STATE', payload: parsed });
+                // 执行数据迁移
+                const migrated = migrateState(parsed);
+                dispatch({ type: 'LOAD_STATE', payload: migrated });
             }
         } catch (error) {
             console.error('Failed to load state from localStorage:', error);
+            // 如果加载失败，清除可能损坏的数据
+            localStorage.removeItem(STORAGE_KEY);
         }
     }, []);
 
