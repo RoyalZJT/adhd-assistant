@@ -18,20 +18,7 @@ function App() {
     const [focusMicroTaskIndex, setFocusMicroTaskIndex] = useState(0);
     const [showDownload, setShowDownload] = useState(false);
 
-    // 认证加载中
-    if (isLoading) {
-        return (
-            <div className="app-loading">
-                <div className="app-loading-spinner"></div>
-                <p>加载中...</p>
-            </div>
-        );
-    }
-
-    // 未登录时显示登录/注册页面
-    if (!isAuthenticated) {
-        return <AuthGate />;
-    }
+    // NOTE: 所有 Hooks 必须在条件渲染之前调用，符合 React Hooks 规则
 
     // 添加/更新任务
     const handleSaveTask = useCallback((task: Task) => {
@@ -102,6 +89,21 @@ function App() {
     const handleDeleteThought = useCallback((id: string) => {
         dispatch({ type: 'DELETE_THOUGHT', payload: id });
     }, [dispatch]);
+
+    // 认证加载中
+    if (isLoading) {
+        return (
+            <div className="app-loading">
+                <div className="app-loading-spinner"></div>
+                <p>加载中...</p>
+            </div>
+        );
+    }
+
+    // 未登录时显示登录/注册页面
+    if (!isAuthenticated) {
+        return <AuthGate />;
+    }
 
     // 计算任务进度
     const getTaskProgress = (task: Task) => {
