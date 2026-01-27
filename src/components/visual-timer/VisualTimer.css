@@ -1,0 +1,186 @@
+/* 视觉计时器 - 未来感霓虹版本 */
+
+.visual-timer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xl);
+    padding: var(--space-xl);
+}
+
+/* 计时器圆环容器 */
+.timer-ring-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+}
+
+/* 外发光环 */
+.timer-ring-container::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--neon-cyan), var(--neon-purple), var(--neon-pink), var(--neon-cyan));
+    opacity: 0.3;
+    filter: blur(20px);
+    animation: spin 10s linear infinite;
+}
+
+/* SVG 圆环 */
+.timer-ring {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+    position: relative;
+    z-index: 1;
+}
+
+/* 背景轨道 */
+.timer-ring-background {
+    fill: none;
+    stroke: hsla(230, 30%, 20%, 0.5);
+    stroke-width: 6;
+}
+
+/* 进度圆环 */
+.timer-ring-progress {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear, stroke 0.5s ease;
+    filter: drop-shadow(0 0 15px currentColor);
+}
+
+/* 进度颜色状态 */
+.timer-ring-progress.safe {
+    stroke: var(--neon-green);
+    filter: drop-shadow(0 0 20px var(--neon-green));
+}
+
+.timer-ring-progress.warning {
+    stroke: var(--warning);
+    filter: drop-shadow(0 0 20px var(--warning));
+}
+
+.timer-ring-progress.danger {
+    stroke: var(--danger);
+    filter: drop-shadow(0 0 25px var(--danger));
+    animation: pulse 1s ease-in-out infinite;
+}
+
+/* 中心时间显示 */
+.timer-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 2;
+}
+
+.timer-time {
+    font-family: 'Orbitron', var(--font-mono);
+    font-size: var(--text-5xl);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    color: var(--text-primary);
+    text-shadow:
+        0 0 10px var(--neon-cyan),
+        0 0 20px var(--neon-cyan),
+        0 0 40px hsla(180, 100%, 50%, 0.5);
+}
+
+.timer-label {
+    font-size: var(--text-sm);
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-top: var(--space-sm);
+    opacity: 0.8;
+}
+
+/* 粒子效果层 */
+.timer-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.timer-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--neon-cyan);
+    opacity: 0;
+    box-shadow: 0 0 10px var(--neon-cyan);
+    animation: particle-float 3s ease-out infinite;
+}
+
+@keyframes particle-float {
+    0% {
+        opacity: 0;
+        transform: translateY(0) scale(0);
+    }
+
+    20% {
+        opacity: 1;
+        transform: translateY(-15px) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.3);
+    }
+}
+
+/* 控制按钮区 */
+.timer-controls {
+    display: flex;
+    gap: var(--space-lg);
+}
+
+.timer-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    font-size: var(--text-2xl);
+    transition: all var(--transition-normal);
+    position: relative;
+}
+
+.timer-btn-primary {
+    background: linear-gradient(135deg, hsla(180, 100%, 50%, 0.3) 0%, hsla(280, 100%, 60%, 0.3) 100%);
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    box-shadow: var(--glow-cyan), inset 0 0 30px hsla(180, 100%, 50%, 0.1);
+}
+
+.timer-btn-primary:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 50px hsla(180, 100%, 50%, 0.6), 0 0 100px hsla(180, 100%, 50%, 0.3), inset 0 0 40px hsla(180, 100%, 50%, 0.2);
+}
+
+.timer-btn-secondary {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+}
+
+.timer-btn-secondary:hover {
+    border-color: var(--neon-purple);
+    color: var(--neon-purple);
+    box-shadow: var(--glow-purple);
+}

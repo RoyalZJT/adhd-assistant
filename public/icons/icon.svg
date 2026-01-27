@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a"/>
+      <stop offset="100%" style="stop-color:#1a1f35"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff"/>
+      <stop offset="50%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#ec4899"/>
+    </linearGradient>
+    <filter id="neon" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="url(#bg)"/>
+  
+  <!-- Outer glow ring -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="url(#glow)" stroke-width="3" opacity="0.3"/>
+  
+  <!-- Brain icon (stylized) -->
+  <g transform="translate(256, 256)" filter="url(#neon)">
+    <!-- Left hemisphere -->
+    <path d="M-60,-80 Q-100,-60 -100,0 Q-100,60 -60,80 Q-40,90 -20,80 Q0,70 0,0 Q0,-70 -20,-80 Q-40,-90 -60,-80" 
+          fill="none" stroke="url(#glow)" stroke-width="4" stroke-linecap="round"/>
+    
+    <!-- Right hemisphere -->
+    <path d="M60,-80 Q100,-60 100,0 Q100,60 60,80 Q40,90 20,80 Q0,70 0,0 Q0,-70 20,-80 Q40,-90 60,-80" 
+          fill="none" stroke="url(#glow)" stroke-width="4" stroke-linecap="round"/>
+    
+    <!-- Connection lines -->
+    <path d="M-30,-40 Q0,-20 30,-40" fill="none" stroke="#00d4ff" stroke-width="3" opacity="0.8"/>
+    <path d="M-30,0 Q0,20 30,0" fill="none" stroke="#00d4ff" stroke-width="3" opacity="0.8"/>
+    <path d="M-30,40 Q0,60 30,40" fill="none" stroke="#00d4ff" stroke-width="3" opacity="0.8"/>
+    
+    <!-- Center dot -->
+    <circle cx="0" cy="0" r="12" fill="#00d4ff"/>
+    <circle cx="0" cy="0" r="6" fill="#fff"/>
+  </g>
+  
+  <!-- Decorative particles -->
+  <circle cx="130" cy="130" r="4" fill="#00d4ff" opacity="0.6"/>
+  <circle cx="380" cy="140" r="3" fill="#8b5cf6" opacity="0.6"/>
+  <circle cx="120" cy="370" r="3" fill="#ec4899" opacity="0.6"/>
+  <circle cx="390" cy="380" r="4" fill="#00d4ff" opacity="0.6"/>
+</svg>

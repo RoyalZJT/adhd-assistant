@@ -1,0 +1,90 @@
+/* ============================================
+   ADHD 助手 - 未来感设计令牌（Design Tokens）
+   ============================================ */
+
+:root {
+  /* 霓虹主色系 - 更具电光感 */
+  --neon-cyan: #00f3ff;
+  --neon-purple: #bc13fe;
+  --neon-pink: #ff0055;
+  --neon-blue: #0066ff;
+  --neon-green: #00ff9d;
+  --neon-orange: #ff9900;
+
+  /* 主色调 - 深邃宇宙 */
+  --primary: var(--neon-cyan);
+  --primary-light: #5cfffc;
+  --primary-dark: #0088aa;
+
+  /* 语义色 */
+  --success: #00ff9d;
+  --warning: #ffcc00;
+  --danger: #ff0055;
+  --info: #00f3ff;
+
+  /* 深空背景 - 更深邃 */
+  --bg-primary: #050510;
+  --bg-secondary: #0a0a1a;
+  --bg-tertiary: #121225;
+  --bg-elevated: #1a1a30;
+
+  /* 玻璃拟态背景 - 更通透 */
+  --glass-bg: rgba(20, 20, 40, 0.6);
+  --glass-bg-hover: rgba(30, 30, 60, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  /* 更细腻的边框 */
+  --glass-border-light: rgba(255, 255, 255, 0.15);
+  --glass-blur: blur(25px);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+  /* 文字颜色 */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.4);
+  --text-highlight: var(--neon-cyan);
+
+  /* 间距系统 */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* 圆角 */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+
+  /* 霓虹阴影 - 扩散更柔和 */
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.5);
+  --glow-cyan: 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3), 0 0 40px rgba(0, 243, 255, 0.1);
+  --glow-purple: 0 0 10px rgba(188, 19, 254, 0.5), 0 0 20px rgba(188, 19, 254, 0.3), 0 0 40px rgba(188, 19, 254, 0.1);
+  --glow-pink: 0 0 10px rgba(255, 0, 85, 0.5), 0 0 20px rgba(255, 0, 85, 0.3), 0 0 40px rgba(255, 0, 85, 0.1);
+  --glow-text: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px var(--neon-cyan);
+
+  /* 过渡动画 */
+  --transition-fast: 150ms ease;
+  --transition-normal: 300ms cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* 字体 */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Orbitron', sans-serif;
+
+  /* 字号 */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 2rem;
+  --text-4xl: 3rem;
+  --text-display: 4.5rem;
+}
