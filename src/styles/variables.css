@@ -1,81 +1,67 @@
 /* ============================================
-   ADHD 助手 - 未来感设计令牌（Design Tokens）
+   ADHD 助手 - 莫兰迪低饱和度设计令牌
    ============================================ */
 
 :root {
-  /* 霓虹主色系 - 更具电光感 */
-  --neon-cyan: #00f3ff;
-  --neon-purple: #bc13fe;
-  --neon-pink: #ff0055;
-  --neon-blue: #0066ff;
-  --neon-green: #00ff9d;
-  --neon-orange: #ff9900;
+  /* 莫兰迪主色系 - 柔和且理智 */
+  --color-sage: #7E9F90;
+  /* 鼠尾草绿 - 主色 */
+  --color-slate: #6B8EAD;
+  /* 雾霾蓝 - 次主色 */
+  --color-terracotta: #E07A5F;
+  /* 陶土红 - 警示/行动 */
+  --color-clay: #F2CC8F;
+  /* 粘土黄 - 辅助 */
+  --color-sand: #81B29A;
+  /* 沙绿 - 辅助 */
 
-  /* 主色调 - 深邃宇宙 */
-  --primary: var(--neon-cyan);
-  --primary-light: #5cfffc;
-  --primary-dark: #0088aa;
+  /* 背景色系统 (Canvas) */
+  --bg-primary: #F7F7F2;
+  /* 纸张白 - 护眼背景 */
+  --bg-secondary: #F0F0EA;
+  /* 次级背景 */
+  --bg-card: #FFFFFF;
+  /* 纯白卡片 */
+  --bg-elevated: #ECECEC;
 
-  /* 语义色 */
-  --success: #00ff9d;
-  --warning: #ffcc00;
-  --danger: #ff0055;
-  --info: #00f3ff;
+  /* 文字颜色 - 避免纯黑 */
+  --text-primary: #333333;
+  --text-secondary: #5F6368;
+  --text-muted: #9AA0A6;
+  --text-highlight: var(--color-sage);
 
-  /* 深空背景 - 更深邃 */
-  --bg-primary: #050510;
-  --bg-secondary: #0a0a1a;
-  --bg-tertiary: #121225;
-  --bg-elevated: #1a1a30;
+  /* 语义色（莫兰迪化） */
+  --success: var(--color-sand);
+  --warning: var(--color-clay);
+  --danger: var(--color-terracotta);
+  --info: var(--color-slate);
 
-  /* 玻璃拟态背景 - 更通透 */
-  --glass-bg: rgba(20, 20, 40, 0.6);
-  --glass-bg-hover: rgba(30, 30, 60, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  /* 更细腻的边框 */
-  --glass-border-light: rgba(255, 255, 255, 0.15);
-  --glass-blur: blur(25px);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-
-  /* 文字颜色 */
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --text-muted: rgba(255, 255, 255, 0.4);
-  --text-highlight: var(--neon-cyan);
-
-  /* 间距系统 */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
-  --space-3xl: 64px;
-
-  /* 圆角 */
-  --radius-xs: 4px;
+  /* 卡片形态 - 弥散阴影 & 大圆角 */
   --radius-sm: 8px;
   --radius-md: 16px;
   --radius-lg: 24px;
-  --radius-xl: 32px;
   --radius-full: 9999px;
 
-  /* 霓虹阴影 - 扩散更柔和 */
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.5);
-  --glow-cyan: 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3), 0 0 40px rgba(0, 243, 255, 0.1);
-  --glow-purple: 0 0 10px rgba(188, 19, 254, 0.5), 0 0 20px rgba(188, 19, 254, 0.3), 0 0 40px rgba(188, 19, 254, 0.1);
-  --glow-pink: 0 0 10px rgba(255, 0, 85, 0.5), 0 0 20px rgba(255, 0, 85, 0.3), 0 0 40px rgba(255, 0, 85, 0.1);
-  --glow-text: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px var(--neon-cyan);
+  /* 柔和阴影 - 减少视觉切割感 */
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-diffused: 0 8px 30px rgba(0, 0, 0, 0.04);
+  --shadow-input: inset 0 2px 4px rgba(0, 0, 0, 0.02);
 
-  /* 过渡动画 */
-  --transition-fast: 150ms ease;
-  --transition-normal: 300ms cubic-bezier(0.25, 0.8, 0.25, 1);
-  --transition-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* 间距系统 - 增加留白 */
+  --space-xs: 4px;
+  --space-sm: 10px;
+  --space-md: 20px;
+  --space-lg: 32px;
+  --space-xl: 48px;
+  --space-2xl: 64px;
+
+  /* 过渡动画 - Q弹与流体 */
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --transition-fluid: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 
   /* 字体 */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-display: 'Orbitron', sans-serif;
 
   /* 字号 */
   --text-xs: 0.75rem;
@@ -83,8 +69,22 @@
   --text-base: 1rem;
   --text-lg: 1.125rem;
   --text-xl: 1.25rem;
-  --text-2xl: 1.5rem;
-  --text-3xl: 2rem;
-  --text-4xl: 3rem;
-  --text-display: 4.5rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-display: 3.5rem;
+}
+
+/* 黑暗模式覆盖 */
+[data-theme='dark'] {
+  --bg-primary: #1A1E23;
+  --bg-secondary: #14171B;
+  --bg-card: #24292E;
+  --bg-elevated: #2D333B;
+
+  --text-primary: #E6EDF3;
+  --text-secondary: #8B949E;
+  --text-muted: #6E7681;
+
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-diffused: 0 8px 30px rgba(0, 0, 0, 0.4);
 }

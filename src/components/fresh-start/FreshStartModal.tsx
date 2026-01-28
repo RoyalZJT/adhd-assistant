@@ -41,7 +41,6 @@ export function FreshStartModal({
                 {/* 温暖的图标 */}
                 <div className="fresh-start-icon">
                     <span className="icon-emoji">🌱</span>
-                    <div className="icon-glow" />
                 </div>
 
                 {/* 标题 */}

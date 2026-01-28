@@ -1,14 +1,14 @@
 /* 注册成功页面样式 */
 .auth-success-container {
     text-align: center;
-    padding: var(--space-2xl);
-    animation: fadeInScale 0.5s ease-out;
+    padding: var(--space-xl);
+    animation: fadeInScale 0.6s var(--transition-fluid);
 }
 
 @keyframes fadeInScale {
     from {
         opacity: 0;
-        transform: scale(0.9);
+        transform: scale(0.95);
     }
 
     to {
@@ -18,60 +18,46 @@
 }
 
 .success-icon {
-    font-size: 72px;
-    margin-bottom: var(--space-lg);
-    animation: bounce 0.6s ease-out;
-}
-
-@keyframes bounce {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-20px);
-    }
+    font-size: 64px;
+    margin-bottom: var(--space-md);
+    display: inline-block;
 }
 
 .success-title {
-    font-size: var(--text-3xl);
+    font-size: var(--text-2xl);
     font-weight: 700;
-    color: var(--text-primary);
-    margin: 0 0 var(--space-sm);
-    background: linear-gradient(135deg, #10b981, #06b6d4);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--color-sage);
+    margin-bottom: 8px;
 }
 
 .success-message {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--text-secondary);
-    margin: 0 0 var(--space-xl);
+    margin-bottom: 32px;
 }
 
 .success-countdown {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--text-muted);
-    margin: 0 0 var(--space-lg);
+    margin-bottom: 24px;
 }
 
 .success-button {
-    padding: 14px 48px;
-    font-size: var(--text-lg);
+    padding: 14px 40px;
+    font-size: 16px;
     font-weight: 600;
     color: white;
-    background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
-    border: none;
+    background: var(--color-sage);
     border-radius: var(--radius-full);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 8px 20px rgba(126, 159, 144, 0.2);
+    transition: all var(--transition-bounce);
 }
 
 .success-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 30px rgba(16, 185, 129, 0.5);
+    box-shadow: 0 12px 30px rgba(126, 159, 144, 0.3);
+}
+
+.success-button:active {
+    transform: scale(0.96);
 }

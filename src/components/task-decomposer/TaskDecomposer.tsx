@@ -92,9 +92,9 @@ export function TaskDecomposer({ onSave, onCancel, existingTask }: TaskDecompose
         <div className="task-decomposer">
             {/* 标题 */}
             <div className="decomposer-header">
-                <h2 className="decomposer-title">📦 拆解大任务</h2>
+                <h2 className="decomposer-title">🌱 魔法拆解</h2>
                 <p className="decomposer-hint">
-                    将复杂任务分解为可在 15 分钟内完成的小步骤
+                    把困难的目标变成一件件可在 15 分钟内搞定的小事
                 </p>
             </div>
 

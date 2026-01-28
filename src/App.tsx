@@ -148,10 +148,6 @@ function App() {
 
     return (
         <div className="app focus-mode">
-            <div className="app-texture" />
-            <div className="app-scanline" />
-            <div className="app-distorted-bg" />
-
             <header className="app-header">
                 <div className="app-logo">
                     <span className="app-logo-icon">🧠</span>
@@ -208,7 +204,6 @@ function App() {
                             <button className="big-action-btn complete" onClick={handleCompleteTask}>
                                 <span className="action-icon">💎</span>
                                 <span className="action-text">搞定它</span>
-                                <div className="btn-glow" />
                             </button>
                         </div>
                     </div>

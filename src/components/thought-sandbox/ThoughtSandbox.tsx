@@ -261,39 +261,32 @@ export function ThoughtSandbox({
                                 onChange={(e) => setInputValue(e.target.value)}
                                 autoFocus
                                 onKeyDown={(e) => {
-                                    // 零摩擦保存：Enter 直接保存，Shift+Enter 换行
                                     if (e.key === 'Enter' && !e.shiftKey) {
                                         e.preventDefault();
                                         handleSave();
                                     }
                                 }}
                             />
-                            <button
-                                className={`thought-voice-btn ${isRecording ? 'active' : ''} ${!speechSupported ? 'disabled' : ''}`}
-                                onClick={handleVoiceInput}
-                                title={
-                                    !speechSupported ? '浏览器不支持语音识别' :
-                                        isRecording ? '点击停止录音' : '点击开始语音输入'
-                                }
-                            >
-                                {isRecording ? '🔴' : '🎤'}
-                            </button>
-                        </div>
-
-                        {/* 录音状态提示 */}
-                        {isRecording && (
-                            <div className="thought-recording-hint">
-                                🎙️ 正在录音，请说话...
+                            <div className="thought-input-footer">
+                                <button
+                                    className={`thought-voice-btn ${isRecording ? 'active' : ''} ${!speechSupported ? 'disabled' : ''}`}
+                                    onClick={handleVoiceInput}
+                                    title={
+                                        !speechSupported ? '浏览器不支持语音识别' :
+                                            isRecording ? '点击停止录音' : '点击开始语音输入'
+                                    }
+                                >
+                                    {isRecording ? '🔴' : '🎤'}
+                                </button>
+                                <button
+                                    className="thought-save-btn"
+                                    onClick={handleSave}
+                                    disabled={!inputValue.trim()}
+                                >
+                                    保存 (Enter)
+                                </button>
                             </div>
-                        )}
-
-                        <button
-                            className="thought-save-btn"
-                            onClick={handleSave}
-                            disabled={!inputValue.trim()}
-                        >
-                            保存 (Enter)
-                        </button>
+                        </div>
                         <div className="thought-hint">
                             💡 Shift+Enter 换行，Esc 关闭
                         </div>
