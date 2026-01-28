@@ -12,8 +12,7 @@ import './App.css';
  * 新版：移除了强制登录，支持右上角登录/注册
  */
 function App() {
-    // 调试日志：跟踪渲染状态
-    console.log('App: Component Render');
+
 
     const { state, dispatch } = useApp();
     const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
