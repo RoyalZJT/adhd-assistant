@@ -9,13 +9,14 @@ import './App.css';
 /**
  * ADHD 助手主应用
  * 终极防御版：包含了全量的空值保护和类型强制转换，防止任何渲染崩溃
+ * 新版：移除了强制登录，支持右上角登录/注册
  */
 function App() {
     // 调试日志：跟踪渲染状态
     console.log('App: Component Render');
 
     const { state, dispatch } = useApp();
-    const { user, isLoading, isAuthenticated, logout } = useAuth();
+    const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
 
     // 状态管理
     const [showTaskForm, setShowTaskForm] = useState(false);
@@ -24,6 +25,10 @@ function App() {
     const [focusMicroTaskIndex, setFocusMicroTaskIndex] = useState(0);
     const [showDownload, setShowDownload] = useState(false);
     const [showFreshStart, setShowFreshStart] = useState(false);
+
+    // 认证模态框状态
+    const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+    const [authInitialView, setAuthInitialView] = useState<'login' | 'register'>('login');
 
     // 安全获取任务列表
     const tasks = useMemo(() => Array.isArray(state?.tasks) ? state.tasks : [], [state?.tasks]);
@@ -132,18 +137,13 @@ function App() {
     }, [dispatch]);
 
     // 认证加载中
-    if (isLoading) {
+    if (authLoading) {
         return (
             <div className="app-loading">
                 <div className="app-loading-spinner"></div>
-                <p>加载中...</p>
+                <p>正在同步状态...</p>
             </div>
         );
-    }
-
-    // 未登录时显示登录/注册页面
-    if (!isAuthenticated) {
-        return <AuthGate />;
     }
 
     // 渲染层辅助函数：确保数据安全
@@ -176,11 +176,19 @@ function App() {
                         <span className="btn-icon">📲</span>
                         <span>下载APP</span>
                     </button>
-                    <div className="user-menu">
-                        <span className="user-avatar">👤</span>
-                        <span className="user-name">{String(user?.username || user?.email?.split('@')[0] || '用户')}</span>
-                        <button className="logout-btn" onClick={logout} title="退出登录">🚪</button>
-                    </div>
+
+                    {isAuthenticated ? (
+                        <div className="user-menu">
+                            <span className="user-avatar">👤</span>
+                            <span className="user-name">{String(user?.username || user?.email?.split('@')[0] || '已登录')}</span>
+                            <button className="logout-btn" onClick={logout} title="退出登录">🚪</button>
+                        </div>
+                    ) : (
+                        <div className="auth-buttons">
+                            <button className="auth-nav-btn login" onClick={() => { setAuthInitialView('login'); setShowAuthModal(true); }}>登录</button>
+                            <button className="auth-nav-btn register" onClick={() => { setAuthInitialView('register'); setShowAuthModal(true); }}>注册</button>
+                        </div>
+                    )}
                 </div>
             </header>
 
@@ -241,6 +249,19 @@ function App() {
                 <div className="modal-overlay">
                     <div className="modal-content">
                         <TaskDecomposer onSave={handleSaveTask} onCancel={() => { setShowTaskForm(false); setEditingTask(null); }} existingTask={editingTask || undefined} />
+                    </div>
+                </div>
+            )}
+
+            {/* 认证模态框 */}
+            {showAuthModal && (
+                <div className="modal-overlay" onClick={() => setShowAuthModal(false)}>
+                    <div className="modal-content auth-modal-content" onClick={e => e.stopPropagation()}>
+                        <button className="modal-close-btn" onClick={() => setShowAuthModal(false)}>✕</button>
+                        <AuthGate
+                            onAuthSuccess={() => setShowAuthModal(false)}
+                            initialView={authInitialView}
+                        />
                     </div>
                 </div>
             )}

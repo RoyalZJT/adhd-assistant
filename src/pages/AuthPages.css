@@ -4,14 +4,18 @@
  */
 
 .auth-page {
-    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     position: relative;
     overflow: hidden;
+}
+
+/* 仅在非弹窗模式下显示全屏背景（保留兼容性） */
+body>#root>.auth-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
 }
 
 /* 背景装饰 */

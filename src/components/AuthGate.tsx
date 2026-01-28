@@ -11,10 +11,11 @@ type AuthView = 'login' | 'register' | 'success';
 
 interface AuthGateProps {
     onAuthSuccess?: () => void;
+    initialView?: AuthView;
 }
 
-export function AuthGate({ onAuthSuccess }: AuthGateProps) {
-    const [view, setView] = useState<AuthView>('login');
+export function AuthGate({ onAuthSuccess, initialView = 'login' }: AuthGateProps) {
+    const [view, setView] = useState<AuthView>(initialView);
     const [countdown, setCountdown] = useState(3);
 
     // 注册成功后的倒计时

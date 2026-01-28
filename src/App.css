@@ -602,4 +602,75 @@
     font-weight: 700;
     color: var(--text-primary);
     margin: 0;
+
+}
+
+/* 认证按钮组 */
+.auth-buttons {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.auth-nav-btn {
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.auth-nav-btn.login {
+    background: transparent;
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+}
+
+.auth-nav-btn.login:hover {
+    background: rgba(0, 243, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+}
+
+.auth-nav-btn.register {
+    background: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+    color: #000;
+}
+
+.auth-nav-btn.register:hover {
+    background: #fff;
+    border-color: #fff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* 认证模态框特有样式 */
+.auth-modal-content {
+    max-width: 450px;
+    position: relative;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    z-index: 1010;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+    background: var(--danger);
+    transform: rotate(90deg);
 }
