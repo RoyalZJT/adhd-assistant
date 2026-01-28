@@ -97,8 +97,8 @@ export const authService = {
         });
 
         if (!response.ok) {
-            const error = await response.json().catch(() => ({}));
-            const errorMessage = error.detail ? formatApiError(error.detail) : '登录失败';
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = formatApiError(errorData);
             throw new ApiError(response.status, errorMessage);
         }
 

@@ -50,12 +50,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         try {
             const loggedInUser = await authService.login(params);
             setUser(loggedInUser);
-        } catch (err) {
-            if (err instanceof ApiError) {
-                setError(err.message);
-            } else {
-                setError('登录失败，请稍后重试');
-            }
+        } catch (err: any) {
+            // 终极保护：确保存入 error state 的永远是字符串
+            const rawMsg = err.message || (typeof err === 'string' ? err : '登录失败');
+            const safeMsg = typeof rawMsg === 'string' ? rawMsg : JSON.stringify(rawMsg);
+            setError(safeMsg);
             throw err;
         } finally {
             setIsLoading(false);

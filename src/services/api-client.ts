@@ -58,25 +58,41 @@ export class ApiError extends Error {
 
 /**
  * 格式化 API 错误信息
- * 专门处理 Pydantic/FastAPI 返回的复杂错误结构
+ * 专门处理 Pydantic/FastAPI 返回的复杂错误结构，确保返回值为 string
  */
-export function formatApiError(detail: any): string {
+export function formatApiError(errorObj: any): string {
+    if (!errorObj) return '未知错误';
+
+    // 如果是字符串，直接返回
+    if (typeof errorObj === 'string') return errorObj;
+
+    // 处理 detail 数组或对象
+    const detail = errorObj.detail !== undefined ? errorObj.detail : errorObj;
+
     if (typeof detail === 'string') return detail;
 
     // 处理 Pydantic 错误数组 (例如 422 错误)
     if (Array.isArray(detail)) {
-        // 取第一条错误信息，通常够用了
         const firstError = detail[0];
         if (firstError && typeof firstError === 'object' && firstError.msg) {
-            // 尝试更友好的格式：[字段名] 错误信息
             const field = firstError.loc ? firstError.loc[firstError.loc.length - 1] : 'Field';
             return `${field}: ${firstError.msg}`;
         }
-        return JSON.stringify(detail);
+        try {
+            return JSON.stringify(detail);
+        } catch (e) {
+            return '数据格式解析失败';
+        }
     }
 
+    // 处理单一 Pydantic 错误对象或其他对象
     if (typeof detail === 'object' && detail !== null) {
-        return JSON.stringify(detail);
+        if (detail.msg) return String(detail.msg);
+        try {
+            return JSON.stringify(detail);
+        } catch (e) {
+            return '对象格式解析失败';
+        }
     }
 
     return String(detail);
@@ -103,10 +119,15 @@ async function request<T>(
         (headers as Record<string, string>)['Authorization'] = `Bearer ${accessToken}`;
     }
 
-    const response = await fetch(url, {
-        ...options,
-        headers,
-    });
+    let response;
+    try {
+        response = await fetch(url, {
+            ...options,
+            headers,
+        });
+    } catch (e) {
+        throw new ApiError(0, '网络请求失败，请检查连接');
+    }
 
     // 处理 401 错误 - 尝试刷新 Token
     if (response.status === 401 && tokenManager.getRefreshToken()) {
@@ -118,9 +139,9 @@ async function request<T>(
             const retryResponse = await fetch(url, { ...options, headers });
 
             if (!retryResponse.ok) {
-                const error = await retryResponse.json().catch(() => ({}));
-                const errorMessage = error.detail ? formatApiError(error.detail) : '请求失败';
-                throw new ApiError(retryResponse.status, errorMessage, error.detail);
+                const errorData = await retryResponse.json().catch(() => ({}));
+                const errorMessage = formatApiError(errorData);
+                throw new ApiError(retryResponse.status, errorMessage);
             }
 
             return retryResponse.json();
@@ -132,10 +153,9 @@ async function request<T>(
     }
 
     if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        const errorMessage = error.detail ? formatApiError(error.detail) : '请求失败';
-        // 传递格式化后的 message
-        throw new ApiError(response.status, errorMessage, error.detail);
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = formatApiError(errorData);
+        throw new ApiError(response.status, errorMessage);
     }
 
     return response.json();
