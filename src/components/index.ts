@@ -1,7 +1,6 @@
-export { VisualTimer } from './visual-timer';
-export { FocusView } from './focus-view';
-export { TaskDecomposer } from './task-decomposer';
-export { ThoughtSandbox } from './thought-sandbox';
-export { DownloadModal } from './download-modal';
-export { CelebrationOverlay } from './celebration';
-export { FreshStartModal } from './fresh-start';
+export * from './task-decomposer/TaskDecomposer';
+export * from './focus-view/FocusView';
+export * from './thought-sandbox/ThoughtSandbox';
+export * from './download-modal/DownloadModal';
+export * from './fresh-start/FreshStartModal';
+export * from './ChatInput';

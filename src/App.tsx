@@ -1,8 +1,8 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useApp } from './store/AppContext';
 import { useAuth } from './contexts/AuthContext';
-import { Task, Thought } from './types';
-import { TaskDecomposer, FocusView, ThoughtSandbox, DownloadModal, FreshStartModal } from './components';
+import { Task, Thought, createTask } from './types';
+import { TaskDecomposer, ThoughtSandbox, DownloadModal, FreshStartModal, ChatInput } from './components';
 import { AuthGate } from './components/AuthGate';
 import './App.css';
 
@@ -21,24 +21,61 @@ function App() {
     // 状态管理
     const [showTaskForm, setShowTaskForm] = useState(false);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
-    const [focusTask, setFocusTask] = useState<Task | null>(null);
-    const [focusMicroTaskIndex, setFocusMicroTaskIndex] = useState(0);
     const [showDownload, setShowDownload] = useState(false);
     const [showFreshStart, setShowFreshStart] = useState(false);
 
     // 认证模态框状态
     const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
-    const [authInitialView, setAuthInitialView] = useState<'login' | 'register'>('login');
 
-    // 安全获取任务列表
-    const tasks = useMemo(() => Array.isArray(state?.tasks) ? state.tasks : [], [state?.tasks]);
+    // 新增状态用于单一焦点展示
+    const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
+    const [isTransitioning, setIsTransitioning] = useState(false);
+
+    // 安全获取任务列表 (过滤掉已归档和已完成任务)
+    const activeTasks = useMemo(() => {
+        const rawTasks = Array.isArray(state?.tasks) ? state.tasks : [];
+        return rawTasks.filter(t => t && !t.archivedAt && t.status !== 'completed');
+    }, [state?.tasks]);
+
+    // 当前显示的焦点任务
+    const currentTask = useMemo(() => {
+        if (activeTasks.length === 0) return null;
+        // 确保索引不越界
+        const index = currentTaskIndex % activeTasks.length;
+        return activeTasks[index];
+    }, [activeTasks, currentTaskIndex]);
+
+    // 切换下一个任务 (跳过)
+    const handleNextTask = useCallback(() => {
+        setIsTransitioning(true);
+        setTimeout(() => {
+            setCurrentTaskIndex(prev => (prev + 1) % (activeTasks.length || 1));
+            setIsTransitioning(false);
+        }, 300); // 短暂延迟以显示过渡效果
+    }, [activeTasks.length]);
+
+    // 完成任务 (搞定它)
+    const handleCompleteTask = useCallback(() => {
+        if (!currentTask) return;
+
+        // 触发震动
+        if ('vibrate' in navigator) {
+            navigator.vibrate(50);
+        }
+
+        dispatch({ type: 'UPDATE_TASK', payload: { ...currentTask, status: 'completed' } as Task });
+
+        // 自动切到下一个，并显示过渡效果
+        setIsTransitioning(true);
+        setTimeout(() => {
+            // 确保在任务列表更新后，索引仍然有效
+            setCurrentTaskIndex(prev => prev % (activeTasks.length || 1));
+            setIsTransitioning(false);
+        }, 500); // 稍长延迟以显示完成效果
+    }, [currentTask, dispatch, activeTasks.length]);
 
     // 计算未完成且未归档的任务数量（逾期任务）
-    const overdueTaskCount = useMemo(() => {
-        return tasks.filter(t =>
-            t && t.status !== 'completed' && !t.archivedAt
-        ).length;
-    }, [tasks]);
+    const overdueTaskCount = activeTasks.length;
 
     // 当逾期任务超过 3 个时，自动弹出宽恕模式
     useEffect(() => {
@@ -62,7 +99,7 @@ function App() {
         setShowFreshStart(false);
     }, [dispatch]);
 
-    // 添加/更新任务
+    // 添加/更新任务 (由 TaskDecomposer 调用)
     const handleSaveTask = useCallback((task: Task) => {
         if (editingTask) {
             dispatch({ type: 'UPDATE_TASK', payload: task });
@@ -73,54 +110,17 @@ function App() {
         setEditingTask(null);
     }, [dispatch, editingTask]);
 
-    // 删除任务
-    const handleDeleteTask = useCallback((taskId: string) => {
-        if (window.confirm('确定要删除这个任务吗？')) {
-            dispatch({ type: 'DELETE_TASK', payload: taskId });
+    // 快速添加任务 (由 ChatInput 调用)
+    const handleQuickAddTask = useCallback((title: string, dueDate?: string) => {
+        const newTask = createTask(title);
+        // 使用类型守卫和显式转换修复 TS2322
+        if (dueDate) {
+            newTask.dueDate = String(dueDate);
         }
-    }, [dispatch]);
-
-    // 开始专注
-    const handleStartFocus = useCallback((task: Task) => {
-        if (!task || !Array.isArray(task.microTasks)) return;
-
-        const firstPendingIndex = task.microTasks.findIndex(
-            mt => mt && mt.status !== 'completed'
-        );
-        if (firstPendingIndex === -1) return;
-
-        setFocusTask(task);
-        setFocusMicroTaskIndex(firstPendingIndex);
-    }, []);
-
-    // 完成当前微任务
-    const handleCompleteMicroTask = useCallback(() => {
-        if (!focusTask || !Array.isArray(focusTask.microTasks)) return;
-
-        const currentMicroTask = focusTask.microTasks[focusMicroTaskIndex];
-        if (!currentMicroTask) return;
-
-        dispatch({
-            type: 'COMPLETE_MICRO_TASK',
-            payload: { taskId: focusTask.id, microTaskId: currentMicroTask.id }
-        });
-
-        const nextIndex = focusTask.microTasks.findIndex(
-            (mt, idx) => idx > focusMicroTaskIndex && mt && mt.status !== 'completed'
-        );
-
-        if (nextIndex !== -1) {
-            setFocusMicroTaskIndex(nextIndex);
-        } else {
-            setFocusTask(null);
-            setFocusMicroTaskIndex(0);
-        }
-    }, [focusTask, focusMicroTaskIndex, dispatch]);
-
-    const handleExitFocus = useCallback(() => {
-        setFocusTask(null);
-        setFocusMicroTaskIndex(0);
-    }, []);
+        dispatch({ type: 'ADD_TASK', payload: newTask });
+        // 自动聚焦到新任务
+        setCurrentTaskIndex(activeTasks.length);
+    }, [dispatch, activeTasks.length]);
 
     // 灵感记录
     const handleAddThought = useCallback((thought: Thought) => {
@@ -146,104 +146,79 @@ function App() {
         );
     }
 
-    // 渲染层辅助函数：确保数据安全
-    const getTaskProgress = (task: Task) => {
-        const microTasks = Array.isArray(task?.microTasks) ? task.microTasks : [];
-        const completed = microTasks.filter(mt => mt && mt.status === 'completed').length;
-        return { completed, total: microTasks.length };
-    };
-
-    const getTaskDuration = (task: Task) => {
-        const microTasks = Array.isArray(task?.microTasks) ? task.microTasks : [];
-        return microTasks.reduce((sum, mt) => sum + (mt?.estimatedMinutes || 0), 0);
-    };
-
     return (
-        <div className="app">
+        <div className="app focus-mode">
             <div className="app-texture" />
             <div className="app-scanline" />
+            <div className="app-distorted-bg" />
 
             <header className="app-header">
                 <div className="app-logo">
                     <span className="app-logo-icon">🧠</span>
-                    <div>
-                        <div className="app-logo-text">ADHD 助手</div>
-                        <div className="app-subtitle">专注 · 拆解 · 完成</div>
+                    <div className="app-logo-text-group">
+                        <div className="app-logo-text">ADHD FOCUS</div>
+                        <div className="app-subtitle">此时 · 此地 · 此事</div>
                     </div>
                 </div>
                 <div className="header-actions">
-                    <button className="header-download-btn" onClick={() => setShowDownload(true)}>
-                        <span className="btn-icon">📲</span>
-                        <span>下载APP</span>
+                    <button className="doom-box-trigger" onClick={() => {/* TODO: Doom Box */ }} title="稍后读箱子">
+                        <span className="btn-icon">📦</span>
                     </button>
-
                     {isAuthenticated ? (
                         <div className="user-menu">
-                            <span className="user-avatar">👤</span>
-                            <span className="user-name">{String(user?.username || user?.email?.split('@')[0] || '已登录')}</span>
-                            <button className="logout-btn" onClick={logout} title="退出登录">🚪</button>
+                            <span className="user-name">{String(user?.username || '已登录')}</span>
+                            <button className="logout-btn" onClick={logout}>🚪</button>
                         </div>
                     ) : (
-                        <div className="auth-buttons">
-                            <button className="auth-nav-btn login" onClick={() => { setAuthInitialView('login'); setShowAuthModal(true); }}>登录</button>
-                            <button className="auth-nav-btn register" onClick={() => { setAuthInitialView('register'); setShowAuthModal(true); }}>注册</button>
-                        </div>
+                        <button className="auth-nav-btn" onClick={() => setShowAuthModal(true)}>登录</button>
                     )}
                 </div>
             </header>
 
             <main className="app-main">
-                {tasks.length === 0 && !showTaskForm ? (
+                {!currentTask ? (
                     <div className="empty-state">
-                        <div className="empty-state-icon">📋</div>
-                        <h2 className="empty-state-title">还没有任务</h2>
-                        <p className="empty-state-text">创建你的第一个任务，将它拆解成小步骤，一步一步完成！</p>
-                        <button className="add-task-btn" onClick={() => { setEditingTask(null); setShowTaskForm(true); }}>
-                            <span className="btn-icon">+</span> 创建第一个任务
-                        </button>
+                        <div className="empty-state-icon">✨</div>
+                        <h2 className="empty-state-title">全速清空！</h2>
+                        <p className="empty-state-text">此刻没有紧迫的任务。是在底部录入一个，还是享受这片刻宁静？</p>
                     </div>
                 ) : (
-                    <div className="task-container">
-                        <div className="task-header">
-                            <h2>我的任务清单</h2>
-                            <button className="add-task-inline-btn" onClick={() => { setEditingTask(null); setShowTaskForm(true); }}>
-                                <span className="btn-icon">+</span> 添加任务
-                            </button>
+                    <div className={`focus-card-container ${isTransitioning ? 'transitioning' : ''}`}>
+                        <div className="focus-card">
+                            <div className="focus-card-header">
+                                <span className="focus-tag">当前唯一核心</span>
+                                <button className="magic-wand-btn" onClick={() => { setEditingTask(currentTask); setShowTaskForm(true); }} title="魔法拆解">✨</button>
+                            </div>
+
+                            <h1 className="focus-main-title">{String(currentTask.title)}</h1>
+
+                            <div className="focus-card-footer">
+                                <div className="focus-meta">
+                                    {currentTask.dueDate && <span className="focus-due">📅 {currentTask.dueDate}</span>}
+                                    <span className="focus-sub-count">🧩 {Array.isArray(currentTask.microTasks) ? currentTask.microTasks.length : 0} 步骤</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="task-grid">
-                            {tasks.map((task) => {
-                                if (!task || !task.id) return null;
-                                const { completed, total } = getTaskProgress(task);
-                                const isCompleted = task.status === 'completed';
-                                return (
-                                    <div key={task.id} className={`task-card ${isCompleted ? 'completed' : ''} ${task.archivedAt ? 'archived' : ''}`}>
-                                        <div className="task-card-header">
-                                            <h3 className="task-title" title={String(task.title)}>{String(task.title)}</h3>
-                                            <div className="task-actions">
-                                                <button className="task-action-btn edit" onClick={() => { setEditingTask(task); setShowTaskForm(true); }} title="编辑">✏️</button>
-                                                <button className="task-action-btn delete" onClick={() => handleDeleteTask(task.id)} title="删除">🗑️</button>
-                                            </div>
-                                        </div>
-                                        <div className="task-meta">
-                                            <span className="task-duration">⏱️ {getTaskDuration(task)} 分钟</span>
-                                            <span className="task-tasks-count">🔢 {total} 个步骤</span>
-                                        </div>
-                                        <div className="task-progress-section">
-                                            <div className="task-progress-bar">
-                                                <div className="task-progress-fill" style={{ width: `${total > 0 ? (completed / total) * 100 : 0}%` }} />
-                                            </div>
-                                            <div className="task-progress-text">{completed} / {total} 已完成</div>
-                                        </div>
-                                        <button className="start-focus-btn" onClick={() => handleStartFocus(task)} disabled={isCompleted}>
-                                            {isCompleted ? '已完成' : '开始专注'}
-                                        </button>
-                                    </div>
-                                );
-                            })}
+
+                        <div className="focus-actions-row">
+                            <button className="big-action-btn skip" onClick={handleNextTask}>
+                                <span className="action-icon">⏩</span>
+                                <span className="action-text">不想做 / 跳过</span>
+                            </button>
+                            <button className="big-action-btn complete" onClick={handleCompleteTask}>
+                                <span className="action-icon">💎</span>
+                                <span className="action-text">搞定它</span>
+                                <div className="btn-glow" />
+                            </button>
                         </div>
                     </div>
                 )}
             </main>
+
+            {/* TODO: ChatInput 替代页脚 */}
+            <footer className="app-footer">
+                <ChatInput onSend={handleQuickAddTask} />
+            </footer>
 
             {showTaskForm && (
                 <div className="modal-overlay">
@@ -255,26 +230,12 @@ function App() {
 
             {/* 认证模态框 */}
             {showAuthModal && (
-                <div className="modal-overlay" onClick={() => setShowAuthModal(false)}>
-                    <div className="modal-content auth-modal-content" onClick={e => e.stopPropagation()}>
+                <div className="modal-overlay">
+                    <div className="auth-modal-content">
                         <button className="modal-close-btn" onClick={() => setShowAuthModal(false)}>✕</button>
-                        <AuthGate
-                            onAuthSuccess={() => setShowAuthModal(false)}
-                            initialView={authInitialView}
-                        />
+                        <AuthGate onAuthSuccess={() => setShowAuthModal(false)} />
                     </div>
                 </div>
-            )}
-
-            {focusTask && focusTask.microTasks && focusTask.microTasks[focusMicroTaskIndex] && (
-                <FocusView
-                    taskTitle={String(focusTask.title)}
-                    microTask={focusTask.microTasks[focusMicroTaskIndex]}
-                    allMicroTasks={focusTask.microTasks}
-                    currentIndex={focusMicroTaskIndex}
-                    onComplete={handleCompleteMicroTask}
-                    onExit={handleExitFocus}
-                />
             )}
 
             <ThoughtSandbox
