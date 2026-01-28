@@ -22,11 +22,11 @@ interface DraftMicroTask {
  * 引导用户将大目标拆解为耗时 < 15 分钟的微型任务
  */
 export function TaskDecomposer({ onSave, onCancel, existingTask }: TaskDecomposerProps) {
-    const [mainTitle, setMainTitle] = useState(existingTask?.title || '');
+    const [mainTitle, setMainTitle] = useState(String(existingTask?.title || ''));
     const [microTasks, setMicroTasks] = useState<DraftMicroTask[]>(
         existingTask?.microTasks.map(mt => ({
             id: mt.id,
-            title: mt.title,
+            title: String(mt.title),
             estimatedMinutes: mt.estimatedMinutes
         })) || [{ id: crypto.randomUUID(), title: '', estimatedMinutes: 10 }]
     );
@@ -63,27 +63,27 @@ export function TaskDecomposer({ onSave, onCancel, existingTask }: TaskDecompose
 
     // 保存任务
     const handleSave = useCallback(() => {
-        if (!mainTitle.trim()) return;
+        if (!String(mainTitle).trim()) return;
 
-        const validMicroTasks = microTasks.filter(mt => mt.title.trim());
+        const validMicroTasks = microTasks.filter(mt => String(mt.title).trim());
         if (validMicroTasks.length === 0) return;
 
         const task: Task = existingTask
             ? {
                 ...existingTask,
-                title: mainTitle.trim(),
-                microTasks: validMicroTasks.map(mt => createMicroTask(mt.title.trim(), mt.estimatedMinutes))
+                title: String(mainTitle).trim(),
+                microTasks: validMicroTasks.map(mt => createMicroTask(String(mt.title).trim(), mt.estimatedMinutes))
             }
             : {
-                ...createTask(mainTitle.trim()),
-                microTasks: validMicroTasks.map(mt => createMicroTask(mt.title.trim(), mt.estimatedMinutes))
+                ...createTask(String(mainTitle).trim()),
+                microTasks: validMicroTasks.map(mt => createMicroTask(String(mt.title).trim(), mt.estimatedMinutes))
             };
 
         onSave(task);
     }, [mainTitle, microTasks, existingTask, onSave]);
 
     // 验证是否可以保存
-    const canSave = mainTitle.trim() && microTasks.some(mt => mt.title.trim());
+    const canSave = String(mainTitle).trim() && microTasks.some(mt => String(mt.title).trim());
 
     // 时间选项（1-15分钟）
     const timeOptions = [1, 2, 3, 5, 8, 10, 12, 15];
@@ -103,7 +103,7 @@ export function TaskDecomposer({ onSave, onCancel, existingTask }: TaskDecompose
                 type="text"
                 className="main-task-input"
                 placeholder="输入你想完成的大目标..."
-                value={mainTitle}
+                value={String(mainTitle)}
                 onChange={(e) => setMainTitle(e.target.value)}
                 autoFocus
             />
@@ -124,7 +124,7 @@ export function TaskDecomposer({ onSave, onCancel, existingTask }: TaskDecompose
                             type="text"
                             className="micro-task-input"
                             placeholder={`第 ${index + 1} 步：具体要做什么？`}
-                            value={task.title}
+                            value={String(task.title)}
                             onChange={(e) => handleMicroTaskTitleChange(task.id, e.target.value)}
                         />
                         <div className="time-selector">

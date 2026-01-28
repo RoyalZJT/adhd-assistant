@@ -3,7 +3,7 @@
  * 管理全局认证状态
  */
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { authService, User, LoginParams, RegisterParams, ApiError } from '../services/auth-service';
+import { authService, User, LoginParams, RegisterParams } from '../services/auth-service';
 
 interface AuthContextType {
     user: User | null;
@@ -73,12 +73,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 password: params.password,
             });
             setUser(loggedInUser);
-        } catch (err) {
-            if (err instanceof ApiError) {
-                setError(err.message);
-            } else {
-                setError('注册失败，请稍后重试');
-            }
+        } catch (err: any) {
+            // 终极保护：确保存入 error state 的永远是字符串
+            const rawMsg = err.message || (typeof err === 'string' ? err : '注册失败');
+            const safeMsg = typeof rawMsg === 'string' ? rawMsg : JSON.stringify(rawMsg);
+            setError(safeMsg);
             throw err;
         } finally {
             setIsLoading(false);

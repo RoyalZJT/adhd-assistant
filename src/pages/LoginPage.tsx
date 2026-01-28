@@ -54,7 +54,7 @@ export function LoginPage({ onSwitchToRegister, onSuccess }: LoginPageProps) {
                     {displayError && (
                         <div className="auth-error">
                             <span className="auth-error-icon">⚠️</span>
-                            {displayError}
+                            {String(displayError)}
                         </div>
                     )}
 

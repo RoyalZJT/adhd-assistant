@@ -101,7 +101,7 @@ export function FocusView({
             {/* 任务标题 */}
             <div className="focus-task-header">
                 <div className="focus-task-label">当前任务</div>
-                <h1 className="focus-task-title">{microTask.title}</h1>
+                <h1 className="focus-task-title">{String(microTask.title)}</h1>
 
                 {/* 进度点 */}
                 <div className="focus-progress-dots">
@@ -111,7 +111,7 @@ export function FocusView({
                             className={`focus-progress-dot ${task.status === 'completed' ? 'completed' :
                                 index === currentIndex ? 'current' : ''
                                 }`}
-                            title={task.title}
+                            title={String(task.title)}
                         />
                     ))}
                 </div>

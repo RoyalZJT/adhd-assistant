@@ -63,10 +63,10 @@ export class ApiError extends Error {
 export function formatApiError(errorObj: any): string {
     if (!errorObj) return '未知错误';
 
-    // 如果是字符串，直接返回
+    // 如果本身就是字符串，确保它是字符串类型并返回
     if (typeof errorObj === 'string') return errorObj;
 
-    // 处理 detail 数组或对象
+    // 处理 detail 数组或对象 (FastAPI 惯例)
     const detail = errorObj.detail !== undefined ? errorObj.detail : errorObj;
 
     if (typeof detail === 'string') return detail;
@@ -76,12 +76,12 @@ export function formatApiError(errorObj: any): string {
         const firstError = detail[0];
         if (firstError && typeof firstError === 'object' && firstError.msg) {
             const field = firstError.loc ? firstError.loc[firstError.loc.length - 1] : 'Field';
-            return `${field}: ${firstError.msg}`;
+            return `${String(field)}: ${String(firstError.msg)}`;
         }
         try {
-            return JSON.stringify(detail);
+            return `[DataArray] ${JSON.stringify(detail)}`;
         } catch (e) {
-            return '数据格式解析失败';
+            return '数据列表格式解析失败';
         }
     }
 
@@ -89,12 +89,13 @@ export function formatApiError(errorObj: any): string {
     if (typeof detail === 'object' && detail !== null) {
         if (detail.msg) return String(detail.msg);
         try {
-            return JSON.stringify(detail);
+            return `[DataObject] ${JSON.stringify(detail)}`;
         } catch (e) {
             return '对象格式解析失败';
         }
     }
 
+    // 最后的保险：强制 String 转换
     return String(detail);
 }
 
