@@ -1,8 +1,80 @@
+/* 基础布局 */
+.app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    color: #fff;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
 /* 专注模式核心容器 */
 .app.focus-mode {
     background: #050510;
-    justify-content: center;
     overflow: hidden;
+}
+
+/* 顶部导航 - 赛博对齐版 */
+.app-header {
+    height: 80px;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 100;
+}
+
+.app-logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.app-logo-icon {
+    font-size: 40px;
+    filter: drop-shadow(0 0 10px var(--neon-cyan));
+}
+
+.app-logo-text-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.app-logo-text {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    background: linear-gradient(135deg, #fff 0%, var(--neon-cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.app-subtitle {
+    font-size: 10px;
+    color: var(--text-secondary);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* 主内容区居中逻辑 */
+.app-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    z-index: 10;
 }
 
 /* 动态扭曲背景 - 降低焦虑的流动感 */
@@ -230,6 +302,9 @@
     font-size: 20px;
     cursor: pointer;
     transition: transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .chat-send-btn:hover {
